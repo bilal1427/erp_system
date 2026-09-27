@@ -1,6 +1,8 @@
 const express = require("express");
 
 const quotationController = require("../controllers/quotation.controller");
+const salesOrderController = require("../controllers/salesOrder.controller");
+
 const { authenticate } = require("../middleware/auth.middleware");
 
 const router = express.Router();
@@ -20,6 +22,11 @@ router.get(
 router.patch(
     "/:id/status",
     quotationController.updateQuotationStatus
+);
+
+router.post(
+    "/:id/convert",
+    salesOrderController.convertQuotation
 );
 
 module.exports = router;
