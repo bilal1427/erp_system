@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const env = require("./config/env");
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => {
     res.json({
