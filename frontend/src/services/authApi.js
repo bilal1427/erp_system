@@ -1,1 +1,10 @@
-// TODO: implementation will be added step-by-step.
+import api from "./api";
+
+export const loginApi = async (email, password) => {
+    const response = await api.post("/auth/login", {
+        email,
+        password
+    });
+
+    return response.data;
+};

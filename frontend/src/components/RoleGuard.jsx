@@ -1,1 +1,18 @@
-// TODO: implementation will be added step-by-step.
+import { useAuth } from "../context/AuthContext";
+
+const RoleGuard = ({
+    allowedRoles,
+    children,
+    fallback = null
+}) => {
+
+    const { role } = useAuth();
+
+    if (!allowedRoles.includes(role)) {
+        return fallback;
+    }
+
+    return children;
+};
+
+export default RoleGuard;
