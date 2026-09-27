@@ -1,4 +1,4 @@
-import {
+import React, {
     createContext,
     useContext,
     useState
@@ -22,10 +22,26 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
 
-        const data = await loginApi(
+        const response = await loginApi(
             email,
             password
         );
+
+        console.log("LOGIN RESPONSE:", response);
+
+        /*
+         * Supports:
+         * { success, data: {...} }
+         * and
+         * { token, email, role, ... }
+         */
+        const data = response?.data || response;
+
+        if (!data?.token) {
+            throw new Error(
+                "Login response did not contain a token."
+            );
+        }
 
         const userData = {
             id: data.id,
@@ -44,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         return userData;
     };
 
+
     const logout = () => {
 
         clearAuthData();
@@ -51,6 +68,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUser(null);
     };
+
 
     const value = {
         token,
@@ -61,12 +79,14 @@ export const AuthProvider = ({ children }) => {
         logout
     };
 
+
     return (
         <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
     );
 };
+
 
 export const useAuth = () => {
 
@@ -80,5 +100,6 @@ export const useAuth = () => {
 
     return context;
 };
+
 
 export default AuthContext;
