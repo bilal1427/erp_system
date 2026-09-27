@@ -22,12 +22,10 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
 
-        const response = await loginApi(
+        const data = await loginApi(
             email,
             password
         );
-
-        const data = response.data;
 
         const userData = {
             id: data.id,
