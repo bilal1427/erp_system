@@ -3,6 +3,8 @@ const cors = require("cors");
 const env = require("./config/env");
 const authRoutes = require("./routes/auth.routes");
 const customerRoutes = require("./routes/customer.routes");
+const productRoutes = require("./routes/product.routes");
+
 
 const app = express();
 
@@ -15,6 +17,7 @@ app.use(
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/products", productRoutes);
 
 app.get("/", (req, res) => {
     res.json({
