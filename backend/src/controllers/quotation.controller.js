@@ -2,9 +2,18 @@ const quotationService = require("../services/quotation.service");
 
 const createQuotation = async (req, res, next) => {
     try {
+        const body = req.body || {};
         const quotation =
             await quotationService.createQuotation({
-                ...req.body,
+                enquiryId: body.enquiryId ?? body.enquiry_id,
+                validUntil: body.validUntil ?? body.valid_until,
+                products: (body.products ?? body.items ?? []).map((item) => ({
+                    productId: item.productId ?? item.product_id,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice ?? item.unit_price,
+                    discountPercent: item.discountPercent ?? item.discount_percent,
+                    gstPercent: item.gstPercent ?? item.gst_percent
+                })),
                 createdBy: req.user.userId
             });
 
@@ -41,7 +50,7 @@ const updateQuotationStatus = async (req, res, next) => {
         const quotation =
             await quotationService.updateQuotationStatus({
                 quotationId: req.params.id,
-                status: req.body.status
+                status: req.body?.status
             });
 
         return res.status(200).json({

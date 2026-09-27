@@ -9,11 +9,12 @@ const createDispatch = async (req, res, next) => {
 
     try {
 
+        const body = req.body || {};
         const dispatch =
             await dispatchService.createDispatch({
-                salesOrderId: req.params.id,
-                vehicleNumber: req.body.vehicleNumber,
-                driverName: req.body.driverName,
+                salesOrderId: body.salesOrderId ?? body.sales_order_id ?? req.params.id,
+                vehicleNumber: body.vehicleNumber ?? body.vehicle_number,
+                driverName: body.driverName ?? body.driver_name,
                 createdBy: req.user.userId
             });
 

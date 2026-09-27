@@ -14,6 +14,8 @@ import Navbar from "./components/Navbar";
 
 import Login from "./pages/Login";
 import Enquiries from "./pages/Enquiries";
+import Quotations from "./pages/Quotations";
+import SalesOrders from "./pages/SalesOrders";
 
 const App = () => {
 
@@ -24,14 +26,14 @@ const App = () => {
 
                 <Routes>
 
-                    {/* Public route */}
+                    {/* Public */}
                     <Route
                         path="/login"
                         element={<Login />}
                     />
 
 
-                    {/* Protected routes */}
+                    {/* Protected */}
                     <Route
                         element={<ProtectedRoute />}
                     >
@@ -56,10 +58,30 @@ const App = () => {
                             }
                         />
 
+                        <Route
+                            path="/quotations"
+                            element={
+                                <>
+                                    <Navbar />
+                                    <Quotations />
+                                </>
+                            }
+                        />
+
+                        <Route
+                            path="/sales-orders"
+                            element={
+                                <>
+                                    <Navbar />
+                                    <SalesOrders />
+                                </>
+                            }
+                        />
+
                     </Route>
 
 
-                    {/* Unknown URL */}
+                    {/* Unknown routes */}
                     <Route
                         path="*"
                         element={

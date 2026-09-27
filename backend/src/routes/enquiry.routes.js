@@ -6,6 +6,8 @@ const {
 
 const { authenticate } = require("../middleware/auth.middleware");
 const { requireRole } = require("../middleware/role.middleware");
+const { validate } = require("../middleware/validate.middleware");
+const { validateEnquiry } = require("../validators/enquiry.validator");
 
 const router = express.Router();
 
@@ -13,6 +15,7 @@ router.post(
     "/",
     authenticate,
     requireRole("ADMIN", "SALES_USER"),
+    validate(validateEnquiry),
     createEnquiry
 );
 

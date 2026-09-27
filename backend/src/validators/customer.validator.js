@@ -1,35 +1,32 @@
 const validateCustomer = (req) => {
-    const { companyName, contactPerson, mobile, email, city } = req.body;
+    const body = req.body || {};
+    const companyName = body.companyName ?? body.company_name;
+    const contactPerson = body.contactPerson ?? body.contact_person;
+    const { mobile, email, city } = body;
 
     const errors = [];
 
-    if (!companyName || companyName.trim() === "") {
+    if (typeof companyName !== "string" || companyName.trim() === "") {
         errors.push("Company name is required");
     }
 
-    if (!contactPerson || contactPerson.trim() === "") {
+    if (typeof contactPerson !== "string" || contactPerson.trim() === "") {
         errors.push("Contact person is required");
     }
 
-    if (!mobile || mobile.trim() === "") {
+    if (typeof mobile !== "string" || mobile.trim() === "") {
         errors.push("Mobile is required");
-    } else if (!/^[0-9]{10}$/.test(mobile)) {
-        errors.push("Mobile must be a valid 10-digit number");
+    } else if (!/^[0-9]{10,15}$/.test(String(mobile).trim())) {
+        errors.push("Mobile must be a valid number (10-15 digits)");
     }
 
-    if (!email || email.trim() === "") {
-        errors.push("Email is required");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push("Email must be valid");
-    }
-
-    if (!city || city.trim() === "") {
-        errors.push("City is required");
+    if (email !== undefined && email !== null && email !== "") {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push("Email must be valid");
+        }
     }
 
     return errors;
 };
 
-module.exports = {
-    validateCustomer
-};
+module.exports = { validateCustomer };

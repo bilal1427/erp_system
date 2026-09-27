@@ -2,7 +2,14 @@ const customerService = require("../services/customer.service");
 
 const createCustomer = async (req, res, next) => {
     try {
-        const customer = await customerService.createCustomer(req.body);
+        const body = req.body || {};
+        const customer = await customerService.createCustomer({
+            companyName: body.companyName ?? body.company_name,
+            contactPerson: body.contactPerson ?? body.contact_person,
+            mobile: body.mobile,
+            email: body.email || null,
+            city: body.city || null
+        });
 
         return res.status(201).json({
             success: true,

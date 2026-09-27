@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import React,{ useEffect, useState } from "react";
 
 import Modal from "../components/Modal";
 import CustomerForm from "../components/enquiry/CustomerForm";

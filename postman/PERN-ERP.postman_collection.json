@@ -1,1 +1,80 @@
-// TODO: implementation will be added step-by-step.
+﻿{
+  "info": {
+    "_postman_id": "1d90b405-352e-4bd4-9da0-erp-pern-api",
+    "name": "PERN ERP API",
+    "description": "API requests for the PERN ERP backend. Start the backend, set baseUrl if needed, then run Login to save the bearer token. Seeded credentials: admin@erp.com / Admin@123.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "token", "value": "" },
+    { "key": "customerId", "value": "1" },
+    { "key": "productId", "value": "1" },
+    { "key": "enquiryId", "value": "1" },
+    { "key": "quotationId", "value": "1" },
+    { "key": "salesOrderId", "value": "1" }
+  ],
+  "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+  "item": [
+    {
+      "name": "Health",
+      "item": [{
+        "name": "API status",
+        "request": { "method": "GET", "url": "{{baseUrl}}/", "description": "Check that the API is running." }
+      }]
+    },
+    {
+      "name": "Authentication",
+      "item": [{
+        "name": "Login",
+        "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["if (pm.response.code >= 200 && pm.response.code < 300) {", "  const body = pm.response.json();", "  const token = body.data && (body.data.token || body.data.accessToken) || body.token;", "  if (token) pm.collectionVariables.set('token', token);", "}"] } }],
+        "request": {
+          "auth": { "type": "noauth" }, "method": "POST",
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@erp.com\",\n  \"password\": \"Admin@123\"\n}", "options": { "raw": { "language": "json" } } },
+          "url": "{{baseUrl}}/api/auth/login"
+        }
+      }]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        { "name": "List customers", "request": { "method": "GET", "url": "{{baseUrl}}/api/customers" } },
+        { "name": "Create customer", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"companyName\": \"Example Manufacturing Pvt Ltd\",\n  \"contactPerson\": \"Amit Sharma\",\n  \"mobile\": \"9876543210\",\n  \"email\": \"amit@example.com\",\n  \"city\": \"Mumbai\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/customers" } }
+      ]
+    },
+    {
+      "name": "Products and inventory",
+      "item": [
+        { "name": "List products", "request": { "method": "GET", "url": "{{baseUrl}}/api/products" } },
+        { "name": "Create product (admin)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"productCode\": \"SKU-100\",\n  \"productName\": \"Industrial Motor\",\n  \"category\": \"Motors\",\n  \"unit\": \"Piece\",\n  \"basePrice\": 25000\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/products" } },
+        { "name": "List inventory", "request": { "method": "GET", "url": "{{baseUrl}}/api/inventory" } }
+      ]
+    },
+    {
+      "name": "Enquiries",
+      "item": [
+        { "name": "List enquiries", "request": { "method": "GET", "url": "{{baseUrl}}/api/enquiries" } },
+        { "name": "Create enquiry", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"customerId\": {{customerId}},\n  \"enquiryDate\": \"2026-01-15\",\n  \"requiredDate\": \"2026-02-15\",\n  \"products\": [\n    { \"productId\": {{productId}}, \"quantity\": 2 }\n  ]\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/enquiries" } }
+      ]
+    },
+    {
+      "name": "Quotations",
+      "item": [
+        { "name": "List quotations", "request": { "method": "GET", "url": "{{baseUrl}}/api/quotations" } },
+        { "name": "Create quotation", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"enquiryId\": {{enquiryId}},\n  \"validUntil\": \"2026-03-15\",\n  \"products\": [\n    { \"productId\": {{productId}}, \"quantity\": 2, \"unitPrice\": 25000, \"discountPercent\": 0, \"gstPercent\": 18 }\n  ]\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/quotations" } },
+        { "name": "Update quotation status", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACCEPTED\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/quotations/{{quotationId}}/status" } },
+        { "name": "Convert quotation to sales order", "request": { "method": "POST", "url": "{{baseUrl}}/api/quotations/{{quotationId}}/convert" } }
+      ]
+    },
+    {
+      "name": "Sales orders and dispatches",
+      "item": [
+        { "name": "List sales orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/sales-orders" } },
+        { "name": "Confirm sales order (admin)", "request": { "method": "POST", "url": "{{baseUrl}}/api/sales-orders/{{salesOrderId}}/confirm" } },
+        { "name": "List dispatches", "request": { "method": "GET", "url": "{{baseUrl}}/api/dispatches" } },
+        { "name": "Create dispatch (admin)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"salesOrderId\": {{salesOrderId}},\n  \"vehicleNumber\": \"MH01AB1234\",\n  \"driverName\": \"Ravi Kumar\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/api/dispatches" } }
+      ]
+    }
+  ]
+}

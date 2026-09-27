@@ -17,13 +17,13 @@ VALUES
 (
     'ERP Admin',
     'admin@erp.com',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC1J1dWmJx3uY0uYJwOe',
+    '$2b$10$7PnxkypSIRSG6P403XnaHeLA1SvMGnsNe215t/Vpg0g48Yzsu2fu.',
     'ADMIN'
 ),
 (
     'Sales User',
     'sales@erp.com',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC1J1dWmJx3uY0uYJwOe',
+    '$2b$10$7PnxkypSIRSG6P403XnaHeLA1SvMGnsNe215t/Vpg0g48Yzsu2fu.',
     'SALES_USER'
 );
 

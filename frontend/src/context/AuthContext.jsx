@@ -27,15 +27,8 @@ export const AuthProvider = ({ children }) => {
             password
         );
 
-        console.log("LOGIN RESPONSE:", response);
-
-        /*
-         * Supports:
-         * { success, data: {...} }
-         * and
-         * { token, email, role, ... }
-         */
         const data = response?.data || response;
+        const account = data?.user || data;
 
         if (!data?.token) {
             throw new Error(
@@ -44,9 +37,10 @@ export const AuthProvider = ({ children }) => {
         }
 
         const userData = {
-            id: data.id,
-            email: data.email,
-            role: data.role
+            id: account.id ?? data.userId,
+            name: account.name,
+            email: account.email,
+            role: account.role
         };
 
         setAuthData(

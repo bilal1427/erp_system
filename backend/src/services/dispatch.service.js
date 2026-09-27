@@ -18,6 +18,8 @@ const createDispatch = async ({
 
         await client.query("BEGIN");
 
+        await client.query("LOCK TABLE dispatches IN SHARE ROW EXCLUSIVE MODE");
+
 
         // ------------------------------------------------
         // 1. Get and lock Sales Order

@@ -2,7 +2,7 @@ const { login } = require("../services/auth.service");
 
 const loginController = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
 
         if (!email || !password) {
             return res.status(400).json({

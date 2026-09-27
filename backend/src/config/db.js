@@ -6,7 +6,10 @@ const pool = new Pool({
     port: env.database.port,
     database: env.database.name,
     user: env.database.user,
-    password: env.database.password
+    password: env.database.password,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
 });
 
 pool.on("connect", () => {

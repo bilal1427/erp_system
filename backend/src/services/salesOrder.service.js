@@ -14,6 +14,8 @@ const convertQuotationToSalesOrder = async ({
     try {
         await client.query("BEGIN");
 
+        await client.query("LOCK TABLE sales_orders IN SHARE ROW EXCLUSIVE MODE");
+
         // 1. Get quotation
         const quotationResult = await client.query(
             `
@@ -195,7 +197,16 @@ const getSalesOrders = async () => {
             so.total_amount,
             so.status,
             so.created_by,
-            so.created_at
+            so.created_at,
+            COALESCE(
+                json_agg(json_build_object(
+                    'product_id', soi.product_id,
+                    'product_code', p.product_code,
+                    'product_name', p.product_name,
+                    'quantity', soi.quantity
+                )) FILTER (WHERE soi.id IS NOT NULL),
+                '[]'::json
+            ) AS items
         FROM sales_orders so
 
         JOIN customers c
@@ -203,6 +214,11 @@ const getSalesOrders = async () => {
 
         JOIN quotations q
             ON q.id = so.quotation_id
+        LEFT JOIN sales_order_items soi
+            ON soi.sales_order_id = so.id
+        LEFT JOIN products p
+            ON p.id = soi.product_id
+        GROUP BY so.id, c.company_name, q.quotation_number
 
         ORDER BY so.id DESC
         `

@@ -1,4 +1,5 @@
 const pool = require("../config/db");
+const { toMoney, calculateLineItem } = require("../utils/quotationCalculator");
 
 const createQuotation = async ({
     enquiryId,
@@ -10,6 +11,8 @@ const createQuotation = async ({
 
     try {
         await client.query("BEGIN");
+
+        await client.query("LOCK TABLE quotations IN SHARE ROW EXCLUSIVE MODE");
 
         // Check enquiry
         const enquiryResult = await client.query(
@@ -110,29 +113,14 @@ const createQuotation = async ({
                 );
             }
 
-            // Base amount
-            const baseAmount =
-                quantity * unitPrice;
+            const { lineAmount } = calculateLineItem({
+                quantity,
+                unitPrice,
+                discountPercent,
+                gstPercent
+            });
 
-            // Discount
-            const discountAmount =
-                baseAmount *
-                (discountPercent / 100);
-
-            // Taxable amount
-            const taxableAmount =
-                baseAmount - discountAmount;
-
-            // GST
-            const gstAmount =
-                taxableAmount *
-                (gstPercent / 100);
-
-            // Final line amount
-            const lineAmount =
-                taxableAmount + gstAmount;
-
-            grandTotal += lineAmount;
+            grandTotal = toMoney(grandTotal + lineAmount);
 
             quotationItems.push({
                 productId: product.id,
@@ -302,32 +290,52 @@ const updateQuotationStatus = async ({
         );
     }
 
-    const result = await pool.query(
-        `
-        UPDATE quotations
-        SET status = $1
-        WHERE id = $2
-        RETURNING
-            id,
-            quotation_number,
-            enquiry_id,
-            customer_id,
-            valid_until,
-            status,
-            grand_total,
-            created_by,
-            created_at
-        `,
-        [status, quotationId]
-    );
-
-    if (result.rows.length === 0) {
-        throw new Error(
-            "Quotation not found"
+    const client = await pool.connect();
+    try {
+        await client.query("BEGIN");
+        const currentResult = await client.query(
+            "SELECT status FROM quotations WHERE id = $1 FOR UPDATE",
+            [quotationId]
         );
-    }
+        if (currentResult.rows.length === 0) throw new Error("Quotation not found");
 
-    return result.rows[0];
+        const currentStatus = currentResult.rows[0].status;
+        const allowedNextStatuses = {
+            DRAFT: ["SENT"],
+            SENT: ["ACCEPTED", "REJECTED"],
+            ACCEPTED: [],
+            REJECTED: []
+        };
+        if (!allowedNextStatuses[currentStatus]?.includes(status)) {
+            throw new Error(`Quotation cannot change from ${currentStatus} to ${status}`);
+        }
+
+        const result = await client.query(
+            `
+            UPDATE quotations
+            SET status = $1
+            WHERE id = $2
+            RETURNING
+                id,
+                quotation_number,
+                enquiry_id,
+                customer_id,
+                valid_until,
+                status,
+                grand_total,
+                created_by,
+                created_at
+            `,
+            [status, quotationId]
+        );
+        await client.query("COMMIT");
+        return result.rows[0];
+    } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+    } finally {
+        client.release();
+    }
 };
 
 

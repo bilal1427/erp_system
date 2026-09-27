@@ -2,8 +2,13 @@ const enquiryService = require("../services/enquiry.service");
 
 const createEnquiry = async (req, res, next) => {
     try {
+        const body = req.body || {};
         const enquiry = await enquiryService.createEnquiry({
-            ...req.body,
+            ...body,
+            customerId: body.customerId ?? body.customer_id,
+            enquiryDate: body.enquiryDate ?? body.enquiry_date,
+            requiredDate: body.requiredDate ?? body.required_date,
+            products: body.products ?? body.items,
             createdBy: req.user.userId
         });
 

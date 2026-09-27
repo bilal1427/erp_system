@@ -13,6 +13,10 @@ const createEnquiry = async ({
     try {
         await client.query("BEGIN");
 
+        // Keep the number allocation and insert together so concurrent
+        // requests cannot select the same next enquiry number.
+        await client.query("LOCK TABLE enquiries IN SHARE ROW EXCLUSIVE MODE");
+
         const enquiryNumberResult = await client.query(
             `
             SELECT COALESCE(MAX(id), 0) + 1 AS next_number
@@ -70,7 +74,7 @@ const createEnquiry = async ({
                 `,
                 [
                     enquiry.id,
-                    item.productId,
+                    item.productId ?? item.product_id,
                     item.quantity
                 ]
             );
@@ -99,10 +103,23 @@ const getEnquiries = async () => {
             e.required_date,
             e.notes,
             e.status,
-            e.created_by
+            e.created_by,
+            COALESCE(
+                json_agg(json_build_object(
+                    'product_id', ei.product_id,
+                    'product_name', p.product_name,
+                    'quantity', ei.quantity
+                )) FILTER (WHERE ei.id IS NOT NULL),
+                '[]'::json
+            ) AS items
         FROM enquiries e
         JOIN customers c
             ON c.id = e.customer_id
+        LEFT JOIN enquiry_items ei
+            ON ei.enquiry_id = e.id
+        LEFT JOIN products p
+            ON p.id = ei.product_id
+        GROUP BY e.id, c.company_name
         ORDER BY e.id DESC
         `
     );
